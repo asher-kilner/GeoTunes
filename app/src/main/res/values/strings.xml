@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">GeoTunes</string>
+    <string name="title_activity_lyric_map_page">lyric_map_page</string>
+    <string name="tab_text_1">Lyrics</string>
+    <string name="tab_text_2">Map</string>
+    <string name="title_activity_lyric_map">LyricMap</string>
+</resources>
