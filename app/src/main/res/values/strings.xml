@@ -4,4 +4,6 @@
     <string name="tab_text_1">Lyrics</string>
     <string name="tab_text_2">Map</string>
     <string name="title_activity_lyric_map">LyricMap</string>
+    <string name="title_activity_maps">Maps</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyBpL9z97sExZk0MfxjoBaeuYLN4v8c3FTY</string>
 </resources>
