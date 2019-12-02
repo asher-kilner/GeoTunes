@@ -19,7 +19,7 @@ import java.lang.Exception
 import java.lang.StringBuilder
 
 class LyricMap : AppCompatActivity() {
-
+    lateinit var current_song : Song
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lyric_map)
@@ -44,12 +44,15 @@ class LyricMap : AppCompatActivity() {
                 it.readText()
             }
             val gson = GsonBuilder().create()
-            val lyricGame = gson.fromJson(json_string, LyricGame::class.java)
+            current_song = gson.fromJson(json_string, Song::class.java)
+            Log.i("current_song", current_song.name)
+            var  h =  LyricActivity()
+            h.song = Song(current_song.artist,current_song.name,current_song.lyrics)
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 }
 
-class LyricGame(val song: Song)
 class Song(val artist: String, val name : String, val lyrics : List<String>)

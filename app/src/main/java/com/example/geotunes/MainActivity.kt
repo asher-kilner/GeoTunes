@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
         val playButton = findViewById<Button>(R.id.play_button)
         playButton.setOnClickListener {
             val intent = Intent(this, LyricMap::class.java)
-            startActivity(intent);
+            startActivity(intent)
         }
 
     }
