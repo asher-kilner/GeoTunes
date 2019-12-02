@@ -12,9 +12,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        var play_button = findViewById<Button>(R.id.play_button)
-
-        play_button.setOnClickListener {
+        val playButton = findViewById<Button>(R.id.play_button)
+        playButton.setOnClickListener {
             val intent = Intent(this, LyricMap::class.java)
             startActivity(intent);
         }
