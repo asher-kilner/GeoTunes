@@ -32,6 +32,7 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps"></activity>
+        <activity android:name=".congratulations" />
         <activity
             android:name=".LyricMap"
             android:label="@string/title_activity_lyric_map"

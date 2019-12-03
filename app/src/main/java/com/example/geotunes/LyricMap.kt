@@ -29,30 +29,27 @@ class LyricMap : AppCompatActivity() {
         val tabs: TabLayout = findViewById(R.id.tabs)
         tabs.setupWithViewPager(viewPager)
 
-        readJson("Classic/bob_dylan.txt")
+        readJson(intent.getStringExtra("song chosen"))
     }
 
-    override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
-        return super.onCreateView(name, context, attrs)
-
-
-    }
-
-    fun readJson(filename : String){
+    private fun readJson(filename : String){
         try {
             val json_string = application.assets.open(filename).bufferedReader().use{
                 it.readText()
             }
             val gson = GsonBuilder().create()
-            current_song = gson.fromJson(json_string, Song::class.java)
+            val song = gson.fromJson(json_string, Song::class.java)
+            current_song = song
+            val tidyName = song.name.replace("_", " ")
+            val tidyArtist = song.artist.replace("_", " ")
+            current_song.name = tidyName
+            current_song.artist = tidyArtist
             Log.i("current_song", current_song.name)
-            var  h =  LyricActivity()
-            h.song = Song(current_song.artist,current_song.name,current_song.lyrics)
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 }
+class Song(var artist: String, var name : String, val lyrics : List<String>)
 
-class Song(val artist: String, val name : String, val lyrics : List<String>)

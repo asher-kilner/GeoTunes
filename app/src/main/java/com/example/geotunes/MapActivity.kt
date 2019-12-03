@@ -25,36 +25,18 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.GoogleMap
 
-
-
-
-
-
-
-
 class MapActivity : Fragment(), OnMapReadyCallback {
 
 
     val PERMISSION_ID = 42
     private lateinit var googleMap: GoogleMap
 
-
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        var root = inflater.inflate(com.example.geotunes.R.layout.fragment_map,container,false)
-
-        return root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
         map_view.onCreate(savedInstanceState)
         map_view.onResume()
 
         map_view.getMapAsync(this)
-    }
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
 
         home_button.setOnClickListener{
             val i = Intent(activity, MainActivity::class.java)
@@ -62,7 +44,16 @@ class MapActivity : Fragment(), OnMapReadyCallback {
         }
     }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        var root = inflater.inflate(com.example.geotunes.R.layout.fragment_map,container,false)
+
+        return root
+    }
+
     override fun onMapReady(map: GoogleMap) {
+        map?.let {
+            googleMap = it
+        }
         googleMap = map
 
         val sydney = LatLng(-34.0, 151.0)

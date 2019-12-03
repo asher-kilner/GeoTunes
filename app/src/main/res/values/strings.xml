@@ -5,5 +5,17 @@
     <string name="tab_text_2">Map</string>
     <string name="title_activity_lyric_map">LyricMap</string>
     <string name="title_activity_maps">Maps</string>
-    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyBpL9z97sExZk0MfxjoBaeuYLN4v8c3FTY</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCMe_-2eDL8OwI5jO4G8oSSP091Rb_y8yg</string>
+    <string name="guess">Guess!</string>
+    <string name="song">Song</string>
+    <string name="artist">Artist</string>
+    <string name="make_a_guess">Make a Guess</string>
+    <string name="correct_guess_made">Guess correct!</string>
+    <string name="no_input_given">you must enter an artist and a song</string>
+    <string name="give_up">give up</string>
+    <string name="keep_playing">keep playing</string>
+    <string name="congratulations">Congratulations!</string>
+    <string name="points_p1">You Received</string>
+    <string name="points_p2">Points!</string>
+    <string name="back_to_main_menu">back to main menu</string>
 </resources>
