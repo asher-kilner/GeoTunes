@@ -27,32 +27,34 @@ class LyricActivity : Fragment(){
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         Log.i("current_song", song.name)
-        home_button.setOnClickListener{
-            startActivity(Intent(activity, MainActivity::class.java))
-        }
-
-        guess_button.setOnClickListener{
-            makeGuess()
-        }
-
-        var lyricString : String = ""
-        for (line in song.lyrics){
-            lyricString += line + "\n"
-        }
-        lyrics.text = lyricString
+        home_button.setOnClickListener{startActivity(Intent(activity, MainActivity::class.java))}
+        guess_button.setOnClickListener{makeGuess()}
+        displayLyrics()
     }
+
     override fun onAttach(activity: Activity) {
         super.onAttach(activity)
+        getSongFromParent()
+    }
+
+    private fun  getSongFromParent(){
         try {
             parent_activity = activity as LyricMap
             song = (parent_activity as LyricMap).current_song
         } catch (e: ClassCastException) {
             throw ClassCastException("$activity must implement OnHeadlineSelectedListener")
         }
-
     }
 
-    private fun makeGuess(){
+    private fun displayLyrics(){
+        var lyricString : String = ""
+        for (line in song.lyrics){
+            lyricString += line + "\n"
+        }
+        lyrics.text = lyricString
+    }
+
+    fun makeGuess(){
 
         val mBuilder = AlertDialog.Builder(this.context)
         val mView  = layoutInflater.inflate(R.layout.dialog_guess,null)
