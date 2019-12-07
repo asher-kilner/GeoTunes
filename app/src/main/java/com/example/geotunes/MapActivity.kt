@@ -17,14 +17,18 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.GoogleMap
 import android.app.Activity
+import android.content.Context
+import android.location.LocationManager
+import android.provider.Settings
+import android.widget.Toast
+import androidx.core.content.ContextCompat.getSystemService
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.*
 import kotlin.random.Random
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.Marker
-
-
-
 
 class MapActivity : Fragment(), OnMapReadyCallback {
 
@@ -32,12 +36,13 @@ class MapActivity : Fragment(), OnMapReadyCallback {
     lateinit var song : Song
     val PERMISSION_ID = 42
     private lateinit var googleMap: GoogleMap
+    private lateinit var mFusedLocationClient: FusedLocationProviderClient
+    private lateinit var currentLocation : LatLng
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         map_view.onCreate(savedInstanceState)
         map_view.onResume()
-
         map_view.getMapAsync(this)
 
         home_button.setOnClickListener{
@@ -54,7 +59,42 @@ class MapActivity : Fragment(), OnMapReadyCallback {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var root = inflater.inflate(com.example.geotunes.R.layout.fragment_map,container,false)
 
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this.activity!!)
+        getLastLocation()
+
+
         return root
+    }
+
+    private fun getLastLocation() {
+        if(checkPermissions()){
+            if(isLocationEnabled()){
+                mFusedLocationClient.lastLocation.addOnCompleteListener(this){ task ->
+                    var location : Location = task.result
+                    if(location == null){
+                        requestNewLocationData()
+                    } else{
+                        var lat = location.latitude
+                        var lng = location.longitude
+
+                        var acuracy = location.accuracy
+
+                        currentLocation = LatLng(lat,lng)
+                    }
+                }
+            } else{
+                Toast.makeText(this.context,"Turn on Location",Toast.LENGTH_LONG).show()
+                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun requestNewLocationData() {
+         var mLocationRequest = LocationRequest()
+        mLocationRequest.priority =LocationRequest.PRIORITY_HIGH_ACCURACY
+        mLocationRequest.interval = 2000
+        mLocationRequest.fastestInterval = 1000
     }
 
     override fun onAttach(activity: Activity) {
@@ -77,6 +117,7 @@ class MapActivity : Fragment(), OnMapReadyCallback {
             LatLng(51.617616, -3.881533), LatLng(51.620075, -3.875482)
         )
         val center = LatLng(51.618901, -3.878546)
+        val myLocation =
 
         generateRandomMarkers(BOUNDS)
 
@@ -84,7 +125,7 @@ class MapActivity : Fragment(), OnMapReadyCallback {
         googleMap.setLatLngBoundsForCameraTarget(BOUNDS)
         googleMap.setMinZoomPreference(15.0f)
         googleMap.setMaxZoomPreference(22.0f)
-        val startlocation = googleMap.addMarker(MarkerOptions().position(center).title("Marker in Sydney"))
+        val startlocation = googleMap.addMarker(MarkerOptions().position(myLocation).title("Marker in Sydney"))
         startlocation.setVisible(false)
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center,16f))
 
@@ -92,9 +133,6 @@ class MapActivity : Fragment(), OnMapReadyCallback {
         if (checkPermissions()) {
             setMyLocationEnabled()
         }
-    }
-    private fun getDeviceLocation(){
-
     }
 
     private fun generateRandomMarkers(bounds: LatLngBounds) {
@@ -106,6 +144,10 @@ class MapActivity : Fragment(), OnMapReadyCallback {
 
     }
 
+    private fun isLocationEnabled():Boolean{
+        var locationManager:LocationManager = this.activity?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)|| locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    }
     private fun checkPermissions(): Boolean {
         if (ContextCompat.checkSelfPermission(this.context!!, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
         ) {
