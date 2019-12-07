@@ -26,7 +26,6 @@ class LyricActivity : Fragment(){
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        Log.i("current_song", song.name)
         home_button.setOnClickListener{startActivity(Intent(activity, MainActivity::class.java))}
         guess_button.setOnClickListener{makeGuess()}
         displayLyrics()
@@ -38,6 +37,7 @@ class LyricActivity : Fragment(){
     }
 
     private fun  getSongFromParent(){
+
         try {
             parent_activity = activity as LyricMap
             song = (parent_activity as LyricMap).current_song

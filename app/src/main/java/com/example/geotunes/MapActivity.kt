@@ -19,9 +19,9 @@ import com.google.android.gms.maps.GoogleMap
 import android.app.Activity
 import android.content.Context
 import android.location.LocationManager
+import android.os.Handler
 import android.provider.Settings
 import android.widget.Toast
-import androidx.core.content.ContextCompat.getSystemService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
@@ -30,6 +30,7 @@ import kotlin.random.Random
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 
+
 class MapActivity : Fragment(), OnMapReadyCallback {
 
     lateinit var parent_activity : Activity
@@ -37,7 +38,11 @@ class MapActivity : Fragment(), OnMapReadyCallback {
     val PERMISSION_ID = 42
     private lateinit var googleMap: GoogleMap
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
-    private lateinit var currentLocation : LatLng
+    private var currentLocation : LatLng = LatLng(51.11,-3.11)
+    private lateinit var mRunnable:Runnable
+    private  var allMarkers : ArrayList<Marker> = arrayListOf()
+    private  var visibleMarkers : ArrayList<Marker> = arrayListOf()
+    private  var clickableMarkers : ArrayList<Marker> = arrayListOf()
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -54,6 +59,8 @@ class MapActivity : Fragment(), OnMapReadyCallback {
             var parentActivity = activity as LyricMap
             parentActivity.setCurrentFragment(0, true)
         }
+
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -62,22 +69,56 @@ class MapActivity : Fragment(), OnMapReadyCallback {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this.activity!!)
         getLastLocation()
 
+        var handler = Handler()
+        var delay : Long = 1_00
+
+        mRunnable = Runnable {
+            handler.postDelayed(Runnable() {
+                run() {
+                    getLastLocation()
+                    visibleMarkers = findMarkersInProximity(20)
+                    clickableMarkers = findMarkersInProximity(5)
+                    handler.postDelayed(mRunnable, delay)
+                }
+            }, delay);
+        }
+
 
         return root
+    }
+
+    private fun findMarkersInProximity(distance: Int): ArrayList<Marker> {
+        val availableMarkers = arrayListOf<Marker>()
+        availableMarkers.add(googleMap.addMarker(MarkerOptions().position(currentLocation)))
+        for (marker in allMarkers){
+
+            val loc1 = Location(LocationManager.GPS_PROVIDER)
+            val loc2 = Location(LocationManager.GPS_PROVIDER)
+
+            loc1.latitude = currentLocation.latitude
+            loc1.longitude = currentLocation.longitude
+
+            loc2.latitude = marker.position.latitude
+            loc2.longitude = marker.position.longitude
+
+            val distancebetween = loc1.distanceTo(loc2)
+            if(distancebetween < distance){
+                availableMarkers.add(marker)
+            }
+        }
+        return availableMarkers
     }
 
     private fun getLastLocation() {
         if(checkPermissions()){
             if(isLocationEnabled()){
-                mFusedLocationClient.lastLocation.addOnCompleteListener(this){ task ->
-                    var location : Location = task.result
+                mFusedLocationClient.lastLocation.addOnCompleteListener(){ task ->
+                    var location : Location? = task.result
                     if(location == null){
                         requestNewLocationData()
                     } else{
                         var lat = location.latitude
                         var lng = location.longitude
-
-                        var acuracy = location.accuracy
 
                         currentLocation = LatLng(lat,lng)
                     }
@@ -112,26 +153,35 @@ class MapActivity : Fragment(), OnMapReadyCallback {
     }
 
     override fun onMapReady(map: GoogleMap) {
-        map?.let {googleMap = it}
+        map.let {googleMap = it}
+
         val BOUNDS = LatLngBounds(
             LatLng(51.617616, -3.881533), LatLng(51.620075, -3.875482)
         )
-        val center = LatLng(51.618901, -3.878546)
-        val myLocation =
 
         generateRandomMarkers(BOUNDS)
+
+        //setUpClickables()
+
 
         // Constrain the camera target to the Adelaide bounds.
         googleMap.setLatLngBoundsForCameraTarget(BOUNDS)
         googleMap.setMinZoomPreference(15.0f)
         googleMap.setMaxZoomPreference(22.0f)
-        val startlocation = googleMap.addMarker(MarkerOptions().position(myLocation).title("Marker in Sydney"))
-        startlocation.setVisible(false)
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center,16f))
-
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,16f))
 
         if (checkPermissions()) {
             setMyLocationEnabled()
+        }
+
+
+    }
+
+    private fun setUpClickables() {
+        var visibleMarkers = findMarkersInProximity(300)
+        var clickableMarkers = findMarkersInProximity(5)
+        for(markers in visibleMarkers){
+            markers.hideInfoWindow()
         }
     }
 
@@ -139,9 +189,25 @@ class MapActivity : Fragment(), OnMapReadyCallback {
         val generatedrandomlats = List(song.lyrics.size) { Random.nextDouble(bounds.southwest.latitude, bounds.northeast.latitude)}
         val generatedrandomlngs = List(song.lyrics.size) { Random.nextDouble(bounds.southwest.longitude, bounds.northeast.longitude)}
         for (i in 0..song.lyrics.size -1){
-            googleMap.addMarker(MarkerOptions().position(LatLng(generatedrandomlats[i], generatedrandomlngs[i])).title(song.lyrics[i]))
-        }
 
+            val marker = googleMap.addMarker(MarkerOptions().position(LatLng(generatedrandomlats[i], generatedrandomlngs[i])).title(song.lyrics[i]).visible(false))
+
+            val loc1 = Location(LocationManager.GPS_PROVIDER)
+            val loc2 = Location(LocationManager.GPS_PROVIDER)
+
+            loc1.latitude = currentLocation.latitude
+            loc1.longitude = currentLocation.longitude
+
+            loc2.latitude = marker.position.latitude
+            loc2.longitude = marker.position.longitude
+
+            val distancebetween = loc1.distanceTo(loc2)
+
+            if(distancebetween < 50){
+                marker.setVisible(true)
+            }
+
+        }
     }
 
     private fun isLocationEnabled():Boolean{
