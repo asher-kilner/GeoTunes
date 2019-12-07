@@ -79,6 +79,7 @@ class MapActivity : Fragment(), OnMapReadyCallback {
         val center = LatLng(51.618901, -3.878546)
 
         generateRandomMarkers(BOUNDS)
+
         // Constrain the camera target to the Adelaide bounds.
         googleMap.setLatLngBoundsForCameraTarget(BOUNDS)
         googleMap.setMinZoomPreference(15.0f)
@@ -91,6 +92,9 @@ class MapActivity : Fragment(), OnMapReadyCallback {
         if (checkPermissions()) {
             setMyLocationEnabled()
         }
+    }
+    private fun getDeviceLocation(){
+
     }
 
     private fun generateRandomMarkers(bounds: LatLngBounds) {
